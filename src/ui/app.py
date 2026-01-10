@@ -1,35 +1,37 @@
 import customtkinter as ctk
+from ui.sidebar import Sidebar
+from ui.views.dashboard import DashboardView
+from ui.views.info import InfoView
 
 class App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
 
-        self.title("BMW Tools")
-        self.geometry("600x400")
+        self.title("BMW Cluster Tools")
+        self.geometry("1000x600")
 
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
-        # Hlavní rám
-        self.frame = ctk.CTkFrame(self)
-        self.frame.pack(padx=20, pady=20, fill="both", expand=True)
+        self.sidebar = Sidebar(self, controller=self)
+        self.sidebar.pack(side="left", fill="y")
 
-        # Nadpis
-        self.label = ctk.CTkLabel(self.frame, text="BMW Cluster Tools", font=("Arial", 24))
-        self.label.pack(pady=10)
+        self.container = ctk.CTkFrame(self)
+        self.container.pack(side="right", fill="both", expand=True)
 
-        # Tlačítko
-        self.button = ctk.CTkButton(
-            self.frame,
-            text="Test komunikace"
-        )
-        self.button.pack(pady=10)
+        self.views = {
+            "dashboard": DashboardView(self.container),
+            "info": InfoView(self.container),
+        }
 
-        # Výstupní text
-        self.output = ctk.CTkTextbox(self.frame, height=200)
-        self.output.pack(pady=10, fill="both", expand=True)
+        self.current_view = None
+        self.show_view("dashboard")
 
-    def log(self, text: str):
-        self.output.insert("end", text + "\n")
-        self.output.see("end")
+    def show_view(self, name: str):
+        if self.current_view:
+            self.current_view.pack_forget()
+
+        view = self.views[name]
+        view.pack(fill="both", expand=True)
+        self.current_view = view
